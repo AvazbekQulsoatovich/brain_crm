@@ -10,14 +10,6 @@ interface LoginPageProps {
   setDarkMode: (v: boolean) => void;
 }
 
-const DEMO_HINTS = [
-  { role: 'Super Admin', username: 'admin', password: 'admin123', color: 'text-rose-600 dark:text-rose-400' },
-  { role: 'Academy Director', username: 'director', password: 'director123', color: 'text-violet-600 dark:text-violet-400' },
-  { role: "O'qituvchi", username: 'bobur', password: '112233', color: 'text-blue-600 dark:text-blue-400' },
-  { role: "O'quvchi", username: 'aziz4567', password: '234567', color: 'text-emerald-600 dark:text-emerald-400' },
-  { role: 'Ota-ona', username: 'ota_aziz4560', password: '234560', color: 'text-amber-600 dark:text-amber-400' },
-];
-
 export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, darkMode, setDarkMode }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -154,21 +146,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, darkMode, setDark
               </button>
             </form>
 
-            <div className="mt-6 border-t border-slate-100 dark:border-slate-800 pt-5">
-              <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Demo kirish (bosing)</p>
-              <div className="space-y-1.5">
-                {DEMO_HINTS.map((h) => (
-                  <button key={h.username} type="button" onClick={() => { setUsername(h.username); setPassword(h.password); setError(''); }}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors group">
-                    <div className="flex items-center gap-2 text-left">
-                      <span className={`text-xs font-semibold ${h.color} w-32 shrink-0`}>{h.role}</span>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">{h.username} / {h.password}</span>
-                    </div>
-                    <ChevronRight className="h-3 w-3 text-slate-300 group-hover:text-indigo-500 shrink-0" />
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           <div className="flex items-center justify-between mt-5 px-1">

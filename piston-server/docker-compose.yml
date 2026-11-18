@@ -4,9 +4,10 @@ services:
   api:
     image: ghcr.io/engineer-man/piston
     container_name: piston_api
+    privileged: true
     restart: always
     ports:
-      - "2000:2000"
+      - "127.0.0.1:2000:2000"
     environment:
       # Memory limits (256MB)
       - PISTON_COMPILE_MEMORY_LIMIT=268435456

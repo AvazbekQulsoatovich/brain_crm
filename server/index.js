@@ -8,6 +8,7 @@ import helmet from 'helmet';
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 4001;
 const PISTON_API_URL = process.env.PISTON_API_URL || 'http://localhost:2000';
 
@@ -58,7 +59,7 @@ app.post('/api/code/execute', executeRateLimit, async (req, res) => {
         version,
         files
       }, {
-        timeout: 3000
+        timeout: 20000
       });
     } catch (err) {
       console.warn(`Local Piston at ${PISTON_API_URL} failed (${err.message}). Falling back to public EMKC Piston API...`);

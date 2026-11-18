@@ -48,53 +48,36 @@ export async function executeCode(language: string, code: string): Promise<CodeE
       };
     }
 
-    // 1. Try public Piston API first (free, CORS enabled, real execution)
+    // 1. Own proxy -> self-hosted Piston (same origin: /api/code/execute)
     try {
-      const response = await fetch('https://emkc.org/api/v2/piston/execute', {
+      const proxyRes = await fetch(`${API_BASE_URL}/code/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          language: language === 'javascript' ? 'js' : language,
-          version: '*',
+          language: language === 'javascript' ? 'js' : language === 'cpp' ? 'c++' : language,
+          version,
           files: [{ content: code }]
         }),
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        const endTime = performance.now();
+      const data = await proxyRes.json().catch(() => null);
+      const endTime = performance.now();
+      if (proxyRes.ok && data) {
+        const run = data.run || {};
+        const compile = data.compile || {};
+        const stderr = (compile.code && compile.code !== 0 ? compile.stderr || compile.output : '') || run.stderr || '';
         return {
-          stdout: data.run?.stdout || (data.run?.stderr ? '' : 'Dastur muvaffaqiyatli yakunlandi (Chiqish yo\'q).'),
-          stderr: data.run?.stderr || '',
+          stdout: run.stdout || (stderr ? '' : "Dastur muvaffaqiyatli yakunlandi (Chiqish yo'q)."),
+          stderr,
           executionTime: Math.round(endTime - startTime),
-          exitCode: data.run?.code || 0,
+          exitCode: run.code ?? 0,
+          errorType: data.errorType || null,
         };
       }
-    } catch (e) {
-      // Try local proxy server on port 4001
-      try {
-        const proxyRes = await fetch('http://localhost:4001/api/code/execute', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            language: language === 'javascript' ? 'js' : language,
-            version: '*',
-            files: [{ content: code }]
-          }),
-        });
-        if (proxyRes.ok) {
-          const data = await proxyRes.json();
-          const endTime = performance.now();
-          return {
-            stdout: data.stdout || '',
-            stderr: data.stderr || '',
-            executionTime: Math.round(endTime - startTime),
-            exitCode: data.stderr ? 1 : 0,
-          };
-        }
-      } catch (proxyErr) {
-        // Fall back to browser simulation below
+      if (data && data.error) {
+        return { stdout: '', stderr: '', error: data.error, executionTime: Math.round(endTime - startTime), exitCode: 1 };
       }
+    } catch (e) {
+      // fall through to browser simulation
     }
 
     // 2. Browser local simulation fallback if API is offline or unreachable
